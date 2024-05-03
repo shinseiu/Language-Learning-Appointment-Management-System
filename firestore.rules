@@ -1,0 +1,27 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 匹配用户集合
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // 匹配 appointments 集合
+    match /appointments/{document=**} {
+      // 允许未认证的用户读取数据，但不允许写入
+      allow read: if true; // 这行代码允许任何人读取 appointments 集合中的数据
+      
+      // 允许管理员读写所有记录
+      allow write: if isAdmin(request.auth.uid); // 管理员依然可以写入数据
+
+      // 允许任何经过身份验证的用户读取和写入他们自己的记录
+      // 这里已经通过 "allow read: if true;" 允许了读取，所以不需要重复
+      allow write: if request.auth != null; // 经过身份验证的用户可以写入数据
+    }
+  }
+}
+
+// 辅助函数，检查给定用户ID是否为管理员
+function isAdmin(userId) {
+  return get(/databases/$(database)/documents/users/$(userId)).data.role == 'admin';
+}

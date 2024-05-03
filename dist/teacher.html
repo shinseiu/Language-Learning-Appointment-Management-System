@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- 网页按照宽度适应 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>予約ページ</title>
+  <!-- 添加 Firebase SDK 和其他依赖项 -->
+  <!-- 确保包括 jQuery、FullCalendar 和 Firebase SDK -->
+  <!-- fullcalendar是日历javascript库 -->
+  <!-- jquery是javascript库 动画-->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css" integrity="sha512-KXkS7cFeWpYwcoXxyfOumLyRGXMp7BTMTjwrgjMg0+hls4thG2JGzRgQtRfnAuKTn2KWTDZX4UdPg+xTs8k80Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js" integrity="sha512-o0rWIsZigOfRAgBxl4puyd0t6YKzeAw9em/29Ag7lhCQfaaua/mDwnpE2PVzwqJ08N7/wqrgdjc2E0mwdSY2Tg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-functions-compat.js"></script>
+<style>
+  body {
+    font-family: 'Arial', sans-serif; /* 优雅的字体 */
+    background: linear-gradient(to right, #74ebd5, #ACB6E5); /* 背景渐变 */
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+#calendar {
+    max-width: 800px; /* 日历最大宽度 */
+    margin: 0 auto;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.8); /* 半透明白色背景 */
+    border-radius: 15px; /* 圆角边框 */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); /* 阴影效果 */
+}
+
+/* 再应用之前的.modal样式和其他样式 */
+
+.modal {
+    display: none; 
+    position:absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    background: linear-gradient(135deg, #6e8efb, #a777e3); /* 渐变背景 */
+    border-radius: 10px; /* 圆角 */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); /* 边框阴影 */
+    padding: 20px;
+    width: 80%;
+    max-width: 400px;
+    animation: modalAppear 0.5s ease-out; /* 出现动画 */
+}
+
+@keyframes modalAppear {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+.modal-content h2 {
+    text-align: center;
+    color: white; /* 标题文字颜色 */
+    margin-bottom: 20px;
+}
+
+.modal-content form {
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-content form label {
+    margin-bottom: 5px;
+    color: white; /* 标签文字颜色 */
+}
+
+.modal-content form input,
+.modal-content form button {
+    padding: 10px;
+    margin-bottom: 15px;
+    border: none;
+    border-radius: 5px;
+}
+
+.modal-content form input {
+    background-color: rgba(255, 255, 255, 0.7);
+}
+
+.modal-content form button {
+    background-color: #ff758c; /* 按钮背景色 */
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s; /* 按钮背景过渡动画 */
+}
+
+.modal-content form button:hover {
+    background-color: #ff527b;
+}
+.modal-content p {
+    line-height: 1.5;
+    margin-bottom: 10px;
+    padding: 5px 0; /* 上下的内边距 */
+    border-bottom: 1px solid #eee; /* 添加细分割线 */
+}
+#detailsName span, #detailsDate span, #detailsTime span, #detailsLanguage span, #detailsMessage span, #detailsAttendees span {
+    font-weight: bold;
+    color:white; /* 突出显示的颜色 */
+}
+
+.close {
+    float: right;
+    color: white;
+    cursor: pointer;
+}
+#exitButton {
+    position: fixed; /* 固定定位，始终显示在页面底部 */
+    left: 50%; /* 水平居中 */
+    bottom: 20px; /* 距离底部20像素 */
+    transform: translateX(-50%); /* 水平居中的微调 */
+    padding: 10px 20px; /* 内边距 */
+    background-color: #ff758c; /* 渐变背景色 */
+    color: white; /* 文字颜色 */
+    border: none; /* 无边框 */
+    border-radius: 5px; /* 圆角 */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 阴影效果 */
+    cursor: pointer; /* 鼠标样式 */
+    transition: background-color 0.3s, transform 0.3s; /* 过渡效果 */
+}
+
+#exitButton:hover {
+    background-color: #ff527b; /* 按钮悬停时的背景色 */
+    transform: translateX(-50%) scale(1.05); /* 按钮悬停时的微小放大效果 */
+}
+
+</style>
+
+</head
+<body>
+
+<div id="calendar"></div>
+
+<div id="appointmentDetails" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>予約詳細</h2>
+        <p id="detailsName">先生の名前: <span></span></p>
+        <p id="detailsDate">日付け: <span></span></p>
+        <p id="detailsTime">時間: <span></span></p>
+        <p id="detailsLanguage">言語: <span></span></p>
+        <p id="detailsMessage">シラバス: <span></span></p>
+        <p id="detailsAttendees">参加者: <span></span></p>
+        <!-- 可以添加更多的详情展示元素 -->
+    </div>
+</div>
+
+
+<div id="appointmentModal" class="modal">
+<div class="modal-content">
+    <span class="close">&times;</span>
+    <h2>予約システム</h2>
+    <form id="appointmentForm">
+    <label for="name">先生の名前:</label>
+    <input type="text" id="name" name="name" required>
+    <label for="date">日付け:</label>
+    <input type="text" id="date" name="date" readonly required>
+    <label for="time">時間:</label>
+    <input type="text" id="time" name="time" required>
+    <label for="language">言語:</label>
+    <input type="text" id="language" name="language" required">
+    <label for="attendees">参加者人数:</label>
+    <input type="number" id="maxAttendees" name="attendees" required min="1">
+	<label for="message">シラバス:</label>
+	<input type="text" id="message" name="message" required>
+    <button type="submit">送信</button>
+    </form>
+</div>
+
+
+
+
+</div>
+
+<!-- 退出按钮 -->
+<button id="exitButton">ロクアウト</button>
+
+<script src="teacher.js"></script>
+
+</body>
+</html>

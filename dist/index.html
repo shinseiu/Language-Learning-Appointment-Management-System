@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>言語学習プラットフォーム</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&family=Great+Vibes&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-firestore-compat.js"></script>
+    <style>
+       body, html {
+           margin: 0;
+           padding: 0;
+           font-family: 'Noto Sans SC', sans-serif;
+       }
+
+       .fancy-title {
+           font-family: 'Great Vibes', cursive;
+           color: #007BFF;
+           text-align: center;
+           font-size: 48px;
+           margin-top: 20px;
+           margin-bottom: 40px;
+       }
+
+       header {
+           background-color: #007BFF;
+           color: white;
+           padding: 10px 20px;
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+           flex-wrap: wrap;
+       }
+
+       #weeklyClasses {
+           background-color: white;
+           color: black;
+           padding: 10px;
+           border-radius: 5px;
+           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+           display: flex;
+           flex-wrap: wrap;
+           justify-content: space-around;
+       }
+
+       .course-item {
+           margin: 5px;
+           flex: 1 0 18%; /* Adjust the width minus margin */
+           background-color: #f8f9fa;
+           border-radius: 5px;
+           box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+           padding: 10px;
+           box-sizing: border-box;
+       }
+
+       #loginButton {
+           background-color: #28A745;
+           border: none;
+           border-radius: 5px;
+           padding: 10px 20px;
+           color: white;
+           cursor: pointer;
+       }
+
+       main {
+           padding: 20px;
+       }
+
+       section {
+           margin-bottom: 20px;
+       }
+
+       h1, h2 {
+           color: #007BFF;
+           text-align: center;
+       }
+
+       footer {
+           background-color: #333;
+           color: white;
+           text-align: center;
+           padding: 10px 0;
+           position: fixed;
+           width: 100%;
+           bottom: 0;
+       }
+
+       .news-item, .comment-item {
+           margin-bottom: 10px;
+           padding: 10px;
+           background-color: #f8f9fa;
+           border-radius: 5px;
+           box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+       }
+
+       ul {
+           list-style-type: none;
+           padding: 0;
+       }
+    </style>
+</head>
+<body>
+    <div class="fancy-title">言語学習プラットフォームへようこそ</div>
+    <header>
+        <div id="weeklyClasses">
+            <h3>今週の授業</h3>
+            <!-- 课程列表 -->
+        </div>
+        <button id="loginButton">ログイン</button>
+    </header>
+    <main>
+        <section id="news">
+            <h2>ニュース</h2>
+            <ul>
+                <li class="news-item">世界の語学学習動向分析レポートを発表</li>
+                <li class="news-item">ランゲージ・ラーニング・アプリの新バージョンは、オンラインで15ヶ国語を学び合うことができる。</li>
+            </ul>
+        </section>
+        <section id="comments">
+            <h2>大家的留言</h2>
+            <ul>
+                <li class="comment-item">張さん：このプラットフォームは本当に素晴らしいです！</li>
+                <li class="comment-item">李さん：ここでたくさんの役に立つ教材を見つけました。特に文法のセクションはとても役に立ちました。</li>
+                <li class="comment-item">王さん：このような素晴らしいプラットフォームを提供してくださってありがとうございます。</li>
+            </ul>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2024 言語学習プラットフォーム. All rights reserved.</p>
+    </footer>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
